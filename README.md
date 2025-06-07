@@ -5,7 +5,7 @@ gosend - High-performance [FastHTTP][FastHTTP] based client for CryptoPay API wi
 
 [CryptoPay]: https://help.send.tg/en/articles/10279948-crypto-pay-api
 [FastHTTP]: https://github.com/valyala/fasthttp
-[FastHTTPRouter]: github.com/fasthttp/router
+[FastHTTPRouter]: https://github.com/fasthttp/router
 ## Install
 
 
