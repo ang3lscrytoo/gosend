@@ -5,6 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+
+	"github.com/gofiber/fiber/v3"
 	"github.com/valyala/fasthttp"
 )
 
@@ -36,6 +38,29 @@ func (client *Client) WebhookFastHTTP(ctx *fasthttp.RequestCtx) {
 	ctx.SetStatusCode(fasthttp.StatusOK)
 
 	go client.webhookManager.invoiceHandler(&webhookUpdate.Payload)
+}
+
+func (client *Client) WebhookFiber(ctx fiber.Ctx) error {
+	data := ctx.BodyRaw()
+
+	if val, exist := ctx.GetHeaders()["crypto-pay-api-signature"]; exist {
+		if len(val) > 0 {
+			signature, _ := hex.DecodeString(val[0])
+
+			if !client.webhookManager.checkSignature(data, signature) {
+				return ctx.SendStatus(403)
+			}
+		}
+	}
+
+	webhookUpdate := new(WebhookUpdate)
+	if err := ctx.Bind().Body(webhookUpdate); err != nil {
+		ctx.SendStatus(500)
+	}
+
+	go client.webhookManager.invoiceHandler(&webhookUpdate.Payload)
+
+	return nil
 }
 
 func (wm WebhookManager) checkSignature(requestBody, requestSignature []byte) bool {
